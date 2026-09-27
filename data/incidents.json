@@ -1,0 +1,112 @@
+[
+  {
+    "id": "INC_001",
+    "service": "payment-api",
+    "errorMessage": "FATAL: too many connections at connection.js:142",
+    "severity": "P1",
+    "affectedUsers": 15000,
+    "timestamp": "2024-09-20T14:30:00Z",
+    "symptoms": [
+      "high latency",
+      "connection timeouts"
+    ],
+    "rootCause": "connection pool misconfiguration",
+    "resolution": [
+      "Increase pool size to 100",
+      "Restart service",
+      "Monitor"
+    ],
+    "timeToResolveMinutes": 12,
+    "lessonLearned": "Set connection pool to 80% of DB max connections"
+  },
+  {
+    "id": "INC_002",
+    "service": "auth-service",
+    "errorMessage": "TypeError: Cannot read property 'verify' of undefined",
+    "severity": "P2",
+    "affectedUsers": 8000,
+    "timestamp": "2024-09-19T10:15:00Z",
+    "symptoms": [
+      "login failures"
+    ],
+    "rootCause": "missing JWT secret in env",
+    "resolution": [
+      "Verify .env file",
+      "Restart auth service"
+    ],
+    "timeToResolveMinutes": 5,
+    "lessonLearned": "Add env validation on startup"
+  },
+  {
+    "id": "INC_003",
+    "service": "notifications-queue",
+    "errorMessage": "Error: ECONNREFUSED - Cannot connect to Redis",
+    "severity": "P2",
+    "affectedUsers": 5000,
+    "timestamp": "2024-09-18T15:45:00Z",
+    "symptoms": [
+      "missed notifications",
+      "queue lag"
+    ],
+    "rootCause": "Redis server crashed",
+    "resolution": [
+      "Restart Redis",
+      "Check memory usage",
+      "Scale if needed"
+    ],
+    "timeToResolveMinutes": 8,
+    "lessonLearned": "Add Redis health checks"
+  },
+  {
+    "id": "INC_004",
+    "service": "payment-api",
+    "errorMessage": "OutOfMemoryError: Java heap space",
+    "severity": "P1",
+    "affectedUsers": 20000,
+    "timestamp": "2024-09-17T12:00:00Z",
+    "symptoms": [
+      "application crashes",
+      "service unavailable"
+    ],
+    "rootCause": "memory leak in payment processing",
+    "resolution": [
+      "Increase heap size",
+      "Deploy fix",
+      "Restart"
+    ],
+    "timeToResolveMinutes": 15,
+    "lessonLearned": "Monitor memory usage per service"
+  },
+  {
+    "id": "INC_005",
+    "service": "database-cluster",
+    "errorMessage": "Deadlock detected. Process ID: 12345",
+    "severity": "P2",
+    "affectedUsers": 12000,
+    "timestamp": "2024-09-16T09:30:00Z",
+    "symptoms": [
+      "query timeouts",
+      "slow responses"
+    ],
+    "rootCause": "database lock contention",
+    "resolution": [
+      "Kill blocking queries",
+      "Optimize indexes",
+      "Monitor locks"
+    ],
+    "timeToResolveMinutes": 10,
+    "lessonLearned": "Set query timeouts"
+  },
+  {
+    "id": "LEARNED_1790505095461",
+    "service": "payment-api",
+    "errorMessage": "Auto-detected",
+    "rootCause": "Auto-detected",
+    "resolution": [
+      "**1. ROOT CAUSE HYPOTHESIS**  \nThe “test error” is most likely caused by a runtime‑time resource bottleneck in the payment‑api service:  \n\n* **Connection‑pool exhaustion or mis‑configuration** – the API attempts to open new DB/Redis connections faster than the pool can supply them, hitting the default timeout and returning a generic “test error”.  \n* **Secondary factor:** recent code changes that added a new synchronous call to an external payment gateway, increasing the average request latency and compounding the pool pressure (similar to the INC_001 pattern).  \n\n**2. RECOMMENDED FIX (3‑4 steps)**  \n\n1. **Validate and adjust the connection pool settings**  \n   * Check current pool size, max‑wait‑time, and idle‑timeout in the service config (e.g., `HikariCP`, `c3p0`, etc.).  \n   * Temporarily raise `maximumPoolSize` by 30‑50 % and reduce `connectionTimeout` to surface failures faster.  \n\n2. **Identify and throttle the new synchronous external call**  \n   * Add a short circuit or bulkhead pattern (e.g., semaphore limit) around the external payment gateway request.  \n   * If possible, make the call asynchronous or use a retry queue to decouple it from the request thread.  \n\n3. **Redeploy with the updated config and monitor**  \n   * Roll out the changes to a canary subset (5‑10 % of traffic).  \n   * Watch key metrics for 5 minutes: connection"
+    ],
+    "timeToResolveMinutes": 5,
+    "timestamp": "2026-09-27T10:31:35.461Z",
+    "learned": true
+  }
+]

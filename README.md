@@ -36,7 +36,7 @@ In my own testing, an analysis that would normally take me a while to piece toge
 - Frontend: React
 - Backend: Node.js + Express
 - AI: Groq (`openai/gpt-oss-120b`)
-- Storage: JSON, kept separately for each team
+- Storage: browser localStorage (JSON), kept separately for each team
 
 ## Running it locally
 
@@ -109,12 +109,12 @@ These are just examples. Swap in your own services in the code.
 
 ## Limitations
 
-Incident history is stored on a single machine/browser, so it isn't shared across devices or people yet. A proper database is the first thing I'd add. It's also a solo project, so there are rough edges.
+Incident history is saved in the browser (localStorage), so it stays in one browser and isn't shared across devices or people yet. A proper database is the first thing I'd add. It's also a solo project, so there are rough edges.
 
 ## What's next
 
 - Slack integration
-- Real database instead of local storage
+- Real database instead of localStorage
 - Log file upload
 
 If you'd want one of these, tell me, and that's what I'll build first.
